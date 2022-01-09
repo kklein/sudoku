@@ -29,47 +29,55 @@ def valid_board(n_blocks: int) -> np.ndarray:
     return reordered_board + 1
 
 
+def permute_indeces(indeces: np.ndarray) -> np.ndarray:
+    permutation = np.random.permutation(range(len(indeces)))
+    return indeces[permutation]
+
+
+def permute_blocks(
+    old_board: np.ndarray, new_board: np.ndarray, n_blocks: int, axis: int
+) -> None:
+    original_indeces = np.array([i * n_blocks for i in range(n_blocks)])
+    permuted_indeces = permute_indeces(original_indeces)
+    all_slice = slice(None)
+    for original_index, permuted_index in zip(original_indeces, permuted_indeces):
+        original_slice = slice(original_index, original_index + n_blocks)
+        permuted_slice = slice(permuted_index, permuted_index + n_blocks)
+        if axis == 0:
+            original_slicing = (original_slice, all_slice)
+            permuted_slicing = (permuted_slice, all_slice)
+        else:
+            original_slicing = (all_slice, original_slice)
+            permuted_slicing = (all_slice, permuted_slice)
+        new_board[original_slicing] = old_board[permuted_slicing]
+
+
+def permute_within_block_vectors(board: np.ndarray, n_blocks: int, axis: int) -> None:
+    all_slice = slice(None)
+    for block_index in range(n_blocks):
+        original_indeces = np.arange(
+            block_index * n_blocks, block_index * n_blocks + n_blocks
+        )
+        permuted_indeces = permute_indeces(original_indeces)
+        if axis == 0:
+            original_slicing = (original_indeces, all_slice)
+            permuted_slicing = (permuted_indeces, all_slice)
+        else:
+            original_slicing = (all_slice, original_indeces)
+            permuted_slicing = (all_slice, permuted_indeces)
+        board[original_slicing] = board[permuted_slicing]
+
+
 def random_board(n_blocks: int) -> np.ndarray:
-    board = valid_board(n_blocks)
-    new_board = board.copy()
+    old_board = valid_board(n_blocks)
+    new_board = old_board.copy()
 
-    def permute_indeces(indeces: np.ndarray) -> np.ndarray:
-        permutation = np.random.permutation(range(len(indeces)))
-        return indeces[permutation]
+    # Either permute rows or columns. If 1, permute rows.
+    axis = np.random.binomial(1, 0.5)
 
-    # Either permute rows or columns.
-    permute_rows = np.random.binomial(1, 0.5)
+    permute_blocks(old_board, new_board, n_blocks, axis=axis)
+    permute_within_block_vectors(new_board, n_blocks, axis=axis)
 
-    if permute_rows:
-        # Shuffling row-blocks.
-        original_indeces = np.array([i * n_blocks for i in range(n_blocks)])
-        permuted_indeces = permute_indeces(original_indeces)
-        for original_index, permuted_index in zip(original_indeces, permuted_indeces):
-            new_board[original_index : original_index + n_blocks, :] = board[
-                permuted_index : permuted_index + n_blocks, :
-            ]
-        # Shuffling rows within blocks.
-        for row_block in range(n_blocks):
-            original_indeces = np.arange(
-                row_block * n_blocks, row_block * n_blocks + n_blocks
-            )
-            permuted_indeces = permute_indeces(original_indeces)
-            new_board[original_indeces, :] = new_board[permuted_indeces, :]
-    else:
-        # Shuffling column-blocks.
-        original_indeces = np.array([i * n_blocks for i in range(n_blocks)])
-        permuted_indeces = permute_indeces(original_indeces)
-        for original_index, permuted_index in zip(original_indeces, permuted_indeces):
-            new_board[:, original_index : original_index + n_blocks] = board[
-                :, permuted_index : permuted_index + n_blocks
-            ]
-        # Shuffling columns within blocks.
-        for column_block in range(n_blocks):
-            original_indeces = np.arange(
-                column_block * n_blocks, column_block * n_blocks + n_blocks
-            )
-            permuted_indeces = permute_indeces(original_indeces)
-            new_board[:, original_indeces] = new_board[:, permuted_indeces]
     return new_board
 
 
