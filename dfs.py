@@ -67,7 +67,7 @@ def get_next_empty_cell_indices(board):
 
 def solve(board):
     next_empty_indices = get_next_empty_cell_indices(board)
-    if next_empty_indeces is None:
+    if next_empty_indices is None:
         print("Solved!")
         return board
     row_index, column_index = next_empty_indices
@@ -80,6 +80,6 @@ def solve(board):
             return solved_board
     board[row_index][column_index] = 0
 
-    
+
 for row in solve(board):
-  print(row)
+    print(row)
