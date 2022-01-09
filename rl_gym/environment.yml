@@ -1,0 +1,9 @@
+name: gym_sudoku
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - numpy
+  - gym
+  - stable-baselines3
+
