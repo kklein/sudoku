@@ -3,16 +3,19 @@ from itertools import chain
 
 import gym
 import numpy as np
+from collections.abc import Sequence
 
 
-@cache
-def valid_board(n_blocks: int) -> np.ndarray:
+def valid_board(n_blocks: int, mapping: Sequence) -> np.ndarray:
     size = n_blocks ** 2
     rows = [
-        [(i + offset) % (size) for i in range(0, size)] for offset in range(0, size)
+        [mapping[(i + offset) % size] for i in range(0, size)] for offset in range(0, size)
     ]
 
+    # rows = [[mapping[i] for i in column] for column in rows]
+
     board = np.array(rows, dtype=np.uint8)
+
     indeces = np.fromiter(
         reduce(
             chain,
@@ -69,7 +72,8 @@ def permute_within_block_vectors(board: np.ndarray, n_blocks: int, axis: int) ->
 
 
 def random_board(n_blocks: int) -> np.ndarray:
-    old_board = valid_board(n_blocks)
+    random_mapping = np.random.permutation(range(n_blocks**2))
+    old_board = valid_board(n_blocks, random_mapping)
     new_board = old_board.copy()
 
     # Either permute rows or columns. If 1, permute rows.
