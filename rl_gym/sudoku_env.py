@@ -11,9 +11,6 @@ def valid_board(n_blocks: int, mapping: Sequence) -> np.ndarray:
     rows = [
         [mapping[(i + offset) % size] for i in range(0, size)] for offset in range(0, size)
     ]
-
-    # rows = [[mapping[i] for i in column] for column in rows]
-
     board = np.array(rows, dtype=np.uint8)
 
     indeces = np.fromiter(
@@ -110,7 +107,6 @@ class SudokuEnv(gym.Env):
     def __init__(self, n_blocks: int):
         self.n_blocks = n_blocks
         size = n_blocks ** 2
-        # print(size)
         self.observation_space = gym.spaces.Box(
             low=0, high=size, shape=(size, size), dtype=np.uint8
         )
